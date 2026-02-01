@@ -23,18 +23,18 @@
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
         data-cf-beacon='{"token": "6dd90a981e8b47dd9725e27e28491525"}'></script>
 
-  <link rel="stylesheet" crossorigin href="/assets/index-T9pEl_Gy.css">
+  <link rel="stylesheet" crossorigin href="/assets/index-CMIgSd6L.css">
 </head>
 
 <body>
 
     <div id="ui-layer">
         <div class="panel">
-            <h2>Light Source</h2>
+            <h2>Source</h2>
 
             <div class="control-row">
                 <span>Beam Spread</span>
-                <input type="range" id="spreadSlider" min="0" max="60" step="1" value="0">
+                <input type="range" id="spreadSlider" min="0" max="180" step="1" value="0">
                 <span class="val-display" id="spreadVal">0°</span>
             </div>
             <div class="control-row">
@@ -44,26 +44,34 @@
             </div>
             <div class="control-row">
                 <span>Source Angle</span>
-                <input type="range" id="angleSlider" min="0" max="360" step="1" value="0">
+                <input type="range" id="angleSlider" min="-180" max="180" step="1" value="0">
                 <span class="val-display" id="angleVal">0°</span>
             </div>
 
-            <h2>Tools</h2>
+            <h2>Blocks</h2>
             <div class="btn-group">
-                <button onclick="addPrism()">+ Prism</button>
-                <button onclick="addBlock()">+ Block</button>
-                <button onclick="addLens('converging')">+ Conv. Lens</button>
-                <button onclick="addLens('diverging')">+ Div. Lens</button>
+                <button onclick="addPrism()">
+                    <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='34%2034%20440%20440'%3e%3cpolygon%20fill='none'%20stroke='%23fff'%20stroke-width='3'%20points='%20180%20340%20260%20180%20340%20340'/%3e%3cline%20x1='40'%20x2='220'%20y1='256'%20y2='256'%20stroke='%23fff'%20stroke-width='3'/%3e%3cline%20x1='300'%20x2='470'%20y1='256'%20y2='200'%20stroke='red'%20stroke-width='3'/%3e%3cline%20x1='300'%20x2='470'%20y1='256'%20y2='230'%20stroke='orange'%20stroke-width='3'/%3e%3cline%20x1='300'%20x2='470'%20y1='256'%20y2='256'%20stroke='%23ff0'%20stroke-width='3'/%3e%3cline%20x1='300'%20x2='470'%20y1='256'%20y2='282'%20stroke='green'%20stroke-width='3'/%3e%3cline%20x1='300'%20x2='470'%20y1='256'%20y2='312'%20stroke='%2300f'%20stroke-width='3'/%3e%3c/svg%3e" alt="Prism" title="Add Prism">
+                </button>
+                <button onclick="addBlock()">
+                    <img src="data:image/svg+xml,%3csvg%20width='512'%20height='512'%20viewBox='34%2034%20440%20440'%20xmlns='http://www.w3.org/2000/svg'%3e%3crect%20x='200'%20y='180'%20width='112'%20height='152'%20fill='none'%20stroke='white'%20stroke-width='3'/%3e%3cpolyline%20points='40,256%20200,256%20312,276%20470,276'%20fill='none'%20stroke='white'%20stroke-width='3'/%3e%3c/svg%3e" alt="Block" title="Add Block">
+                </button>
+                <button onclick="addLens('converging')">
+                    <img src="data:image/svg+xml,%3csvg%20width='512'%20height='512'%20viewBox='34%2034%20440%20440'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20transform='translate(0,%20128)'%3e%3cline%20x1='20'%20y1='80'%20x2='240'%20y2='80'%20stroke='white'%20stroke-width='3'/%3e%3cline%20x1='20'%20y1='128'%20x2='230'%20y2='128'%20stroke='white'%20stroke-width='3'/%3e%3cline%20x1='20'%20y1='176'%20x2='240'%20y2='176'%20stroke='white'%20stroke-width='3'/%3e%3c!--%20lens%20--%3e%3cpath%20d='M252%2038C225%20124%20225%20128%20252%20218'%20fill='none'%20stroke='white'%20stroke-width='3'/%3e%3cpath%20d='M260%2038C289%20126%20289%20128%20260%20218'%20fill='none'%20stroke='white'%20stroke-width='3'/%3e%3c!--%20converging%20rays%20--%3e%3cline%20x1='272'%20y1='80'%20x2='480'%20y2='40'%20stroke='white'%20stroke-width='3'/%3e%3cline%20x1='282'%20y1='128'%20x2='480'%20y2='128'%20stroke='white'%20stroke-width='3'/%3e%3cline%20x1='272'%20y1='176'%20x2='480'%20y2='216'%20stroke='white'%20stroke-width='3'/%3e%3c/g%3e%3c/svg%3e" alt="Converging Lens" title="Add Converging Lens">
+                </button>
+                <button onclick="addLens('diverging')">
+                    <img src="data:image/svg+xml,%3csvg%20width='512'%20height='512'%20viewBox='34%2034%20440%20440'%20xmlns='http://www.w3.org/2000/svg'%3e%3cg%20transform='translate(0,%20128)'%3e%3cline%20x1='20'%20y1='80'%20x2='240'%20y2='80'%20stroke='white'%20stroke-width='3'/%3e%3cline%20x1='20'%20y1='128'%20x2='250'%20y2='128'%20stroke='white'%20stroke-width='3'/%3e%3cline%20x1='20'%20y1='176'%20x2='240'%20y2='176'%20stroke='white'%20stroke-width='3'/%3e%3c!--%20lens%20--%3e%3cg%20transform='translate(30,%200)'%3e%3cpath%20d='M252%2038C225%20124%20225%20128%20252%20218'%20fill='none'%20stroke='white'%20stroke-width='3'/%3e%3c/g%3e%3cg%20transform='translate(-30,%200)'%3e%3cpath%20d='M260%2038C289%20126%20289%20128%20260%20218'%20fill='none'%20stroke='white'%20stroke-width='3'/%3e%3c/g%3e%3c!--%20converging%20rays%20--%3e%3cline%20x1='272'%20y1='80'%20x2='480'%20y2='40'%20stroke='white'%20stroke-width='3'/%3e%3cline%20x1='262'%20y1='128'%20x2='480'%20y2='128'%20stroke='white'%20stroke-width='3'/%3e%3cline%20x1='272'%20y1='176'%20x2='480'%20y2='216'%20stroke='white'%20stroke-width='3'/%3e%3c/g%3e%3c/svg%3e" alt="Diverging Lens" title="Add Diverging Lens">
+                </button>
             </div>
-            <button class="danger" onclick="clearScene()" style="width:100%">Clear Scene</button>
+            <button class="danger" onclick="clearScene()" style="width:100%">Clear</button>
         </div>
 
-        <div class="panel" id="selectionPanel">
+        <div class="panel" id="selectionPanel" style="position:absolute; left:20px; top:20px;">
             <h2 style="color:#ff00de">Selected Object</h2>
 
             <div class="control-row">
                 <span>Rotation</span>
-                <input type="range" id="objRotation" min="0" max="360" step="1">
+                <input type="range" id="objRotation" min="-180" max="180" step="1">
                 <span class="val-display" id="objRotVal">0°</span>
             </div>
 
