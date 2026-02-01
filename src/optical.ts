@@ -22,9 +22,10 @@ export class OpticalObject {
     this.x = x;
     this.y = y;
     this.rotation = 0;
-    this.refractiveIndex = 1.1;
+    this.refractiveIndex = 1.5;
     this.selected = false;
   }
+
   toLocal (pt) {
     let dx = pt.x - this.x;
     let dy = pt.y - this.y;
@@ -151,6 +152,7 @@ export class Lens extends OpticalObject {
     this.width = 20;
     this.curvature = 0.008;
   }
+
   intersect (rayOrigin, rayDir): Hit {
     const localOrg = this.toLocal(rayOrigin);
     const localDir = {

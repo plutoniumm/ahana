@@ -196,6 +196,7 @@ function loop () {
 
   ctx.strokeStyle = '#1a1a1a';
   ctx.lineWidth = 1 / zoom;
+
   const gridStep = 50;
   const viewMinX = -panOffset.x / zoom;
   const viewMinY = -panOffset.y / zoom;
@@ -203,8 +204,19 @@ function loop () {
   const viewMaxY = viewMinY + height / zoom;
   let startX = Math.floor(viewMinX / gridStep) * gridStep;
   let startY = Math.floor(viewMinY / gridStep) * gridStep;
-  for (let x = startX; x <= viewMaxX; x += gridStep) { ctx.beginPath(); ctx.moveTo(x, viewMinY); ctx.lineTo(x, viewMaxY); ctx.stroke(); }
-  for (let y = startY; y <= viewMaxY; y += gridStep) { ctx.beginPath(); ctx.moveTo(viewMinX, y); ctx.lineTo(viewMaxX, y); ctx.stroke(); }
+
+  for (let x = startX; x <= viewMaxX; x += gridStep) {
+    ctx.beginPath();
+    ctx.moveTo(x, viewMinY);
+    ctx.lineTo(x, viewMaxY);
+    ctx.stroke();
+  }
+  for (let y = startY; y <= viewMaxY; y += gridStep) {
+    ctx.beginPath();
+    ctx.moveTo(viewMinX, y);
+    ctx.lineTo(viewMaxX, y);
+    ctx.stroke();
+  }
 
   objects.forEach(o => o.draw(ctx));
 
@@ -216,9 +228,21 @@ function loop () {
   const baseAngle = parseFloat(ui.angle.value) * (Math.PI / 180);
 
   const wavelengths = [
-    { color: '#ff0000', nOffset: -DISPERSION_STRENGTH, label: 'R' },
-    { color: '#00ff00', nOffset: 0, label: 'G' },
-    { color: '#0088ff', nOffset: DISPERSION_STRENGTH, label: 'B' }
+    {
+      color: '#ff0000',
+      nOffset: -DISPERSION_STRENGTH,
+      label: 'R'
+    },
+    {
+      color: '#00ff00',
+      nOffset: 0,
+      label: 'G'
+    },
+    {
+      color: '#0088ff',
+      nOffset: DISPERSION_STRENGTH,
+      label: 'B'
+    }
   ];
 
   wavelengths.forEach(wave => {
@@ -260,7 +284,6 @@ function loop () {
 function traceSingleRay (origin, dir, nOffset, intensity) {
   let ray = { origin: { ...origin }, dir: { ...dir } };
 
-  let currentRefractiveIndex = 1.0;
   let points = [ray.origin];
 
   for (let b = 0; b < MAX_BOUNCES; b++) {
@@ -393,47 +416,52 @@ function onMouseUp () {
   isPanning = false;
 }
 
+const deg = (deg: number) => deg * (Math.PI / 180);
+
 function runReconvergence () {
   clearScene();
-  ui.angle.value = '0';
+  ui.angle.value = '-45';
   ui.angle.dispatchEvent(new Event('input'));
-  ui.spread.value = '20';
+  ui.spread.value = '0';
   ui.spread.dispatchEvent(new Event('input'));
-  ui.rays.value = '50';
+  ui.rays.value = '10';
   ui.rays.dispatchEvent(new Event('input'));
-  lightSource = { x: width * 0.2, y: height * 0.6 };
+  lightSource = { x: width * 0.3, y: height * 0.75 };
 
   const s = 100;
   const h = s * Math.sqrt(3) / 2;
   const tri = [{ x: -s / 2, y: h / 3 }, { x: s / 2, y: h / 3 }, { x: 0, y: -2 * h / 3 }];
-  const prism1 = new Polygon(width * 0.45, height * 0.55, tri);
-  prism1.rotation = 0;
-  prism1.refractiveIndex = 1.5;
-  const prism2 = new Polygon(width * 0.65, height * 0.55, tri);
-  prism2.rotation = Math.PI;
-  prism2.refractiveIndex = 1.5;
-  const lens = new Lens(width * 0.55, height * 0.5, 'converging');
+
+  const prism1 = new Polygon(width * 0.35, height * 0.7, tri);
+  prism1.rotation = deg(-30);
+
+  const prism2 = new Polygon(width * 0.57, height * 0.69, tri);
+  prism2.rotation = deg(30);
+
+  const lens = new Lens(width * 0.451, height * 0.67, 'converging');
   lens.curvature = 0.01;
-  lens.refractiveIndex = 1.45;
-  lens.rotation = 0;
+  lens.refractiveIndex = 1.5;
+  lens.rotation = deg(0);
+
   objects.push(prism1, prism2, lens);
 }
 
 function runPinkFloyd () {
   clearScene();
-  ui.angle.value = '0';
+  ui.angle.value = '-15';
   ui.angle.dispatchEvent(new Event('input'));
-  ui.spread.value = '0';
+  ui.spread.value = '1';
   ui.spread.dispatchEvent(new Event('input'));
-  ui.rays.value = '1';
+  ui.rays.value = '5';
   ui.rays.dispatchEvent(new Event('input'));
-  lightSource = { x: width * 0.25, y: height * 0.6 };
+  lightSource = { x: width * 0.4, y: height * 0.6 };
 
   const s = 120;
   const h = s * Math.sqrt(3) / 2;
   const tri = [{ x: -s / 2, y: h / 3 }, { x: s / 2, y: h / 3 }, { x: 0, y: -2 * h / 3 }];
+
   const prism = new Polygon(width * 0.55, height * 0.55, tri);
-  prism.rotation = 0;
+  prism.rotation = deg(0);
   prism.refractiveIndex = 1.5;
   objects.push(prism);
 }
