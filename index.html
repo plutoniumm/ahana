@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ahana</title>
+
+    <meta name="title" content="Ahana">
+    <meta name="description"
+        content="A simple ray optics simulator for basic lenses, prisms, and blocks with dispersion effects.">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="author" content="plutoniumm">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Ahana">
+    <meta property="og:description"
+        content="A ray optics simulator for basic lenses, prisms, and blocks with dispersion effects.">
+
+    <!-- analytics on plutoniumm.github.io -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+        data-cf-beacon='{"token": "6dd90a981e8b47dd9725e27e28491525"}'></script>
+
+  <link rel="stylesheet" crossorigin href="/assets/index-T9pEl_Gy.css">
+</head>
+
+<body>
+
+    <div id="ui-layer">
+        <div class="panel">
+            <h2>Light Source</h2>
+
+            <div class="control-row">
+                <span>Beam Spread</span>
+                <input type="range" id="spreadSlider" min="0" max="60" step="1" value="0">
+                <span class="val-display" id="spreadVal">0°</span>
+            </div>
+            <div class="control-row">
+                <span>Ray Density</span>
+                <input type="range" id="rayCountSlider" min="10" max="300" step="10" value="100">
+                <span class="val-display" id="rayVal">100</span>
+            </div>
+            <div class="control-row">
+                <span>Source Angle</span>
+                <input type="range" id="angleSlider" min="0" max="360" step="1" value="0">
+                <span class="val-display" id="angleVal">0°</span>
+            </div>
+
+            <h2>Tools</h2>
+            <div class="btn-group">
+                <button onclick="addPrism()">+ Prism</button>
+                <button onclick="addBlock()">+ Block</button>
+                <button onclick="addLens('converging')">+ Conv. Lens</button>
+                <button onclick="addLens('diverging')">+ Div. Lens</button>
+            </div>
+            <button class="danger" onclick="clearScene()" style="width:100%">Clear Scene</button>
+        </div>
+
+        <div class="panel" id="selectionPanel">
+            <h2 style="color:#ff00de">Selected Object</h2>
+
+            <div class="control-row">
+                <span>Rotation</span>
+                <input type="range" id="objRotation" min="0" max="360" step="1">
+                <span class="val-display" id="objRotVal">0°</span>
+            </div>
+
+            <div class="control-row">
+                <span>Refractive Index</span>
+                <input type="range" id="objIOR" min="1.0" max="2.5" step="0.01">
+                <span class="val-display" id="objIORVal">1.5</span>
+            </div>
+
+            <div id="lensControls" style="display:none">
+                <div class="control-row">
+                    <span>Curvature</span>
+                    <input type="range" id="objCurve" min="0.001" max="0.02" step="0.001">
+                </div>
+            </div>
+
+            <button class="danger" onclick="deleteSelected()" style="width:100%; margin-top:5px;">Delete Object</button>
+        </div>
+    </div>
+
+    <canvas id="simCanvas"></canvas>
+    <script src="/index.js"></script>
+</body>
+
+</html>
