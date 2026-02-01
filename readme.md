@@ -3,6 +3,6 @@
 </a>
 
 ### ahana
-ray optics simulator.
+[ray optics simulator](https://plutoniumm.github.io/ahana/)
 
 The main point being that just flipping the prism won't recombine to give us the white light again. We need a converging lens in the middle to change divergence to convergence.
