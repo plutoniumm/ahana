@@ -27,10 +27,13 @@
 </head>
 
 <body>
-
     <div id="ui-layer">
-        <div class="panel">
-            <h2>Source</h2>
+        <details class="panel" open>
+            <summary class="h2">
+                Controls
+            </summary>
+
+            <h3>Source</h3>
 
             <div class="control-row">
                 <span>Beam Spread</span>
@@ -48,7 +51,7 @@
                 <span class="val-display" id="angleVal">0°</span>
             </div>
 
-            <h2>Blocks</h2>
+            <h3>Blocks</h3>
             <div class="btn-group">
                 <button onclick="addPrism()">
                     <img src="/icons/prism.svg" alt="Prism" title="Add Prism">
@@ -63,11 +66,17 @@
                     <img src="/icons/div.svg" alt="Diverging Lens" title="Add Diverging Lens">
                 </button>
             </div>
+
+            <h3>Presets</h3>
+            <div class="btn-group">
+                <button onclick="runReconvergence()">Reconvergence Demo</button>
+                <button onclick="runPinkFloyd()">Pink Floyd Demo</button>
+            </div>
             <button class="danger" onclick="clearScene()" style="width:100%">Clear</button>
-        </div>
+        </details>
 
         <div class="panel" id="selectionPanel" style="position:absolute; left:20px; top:20px;">
-            <h2 style="color:#ff00de">Selected Object</h2>
+            <h2>Selected Object</h2>
 
             <div class="control-row">
                 <span>Rotation</span>
@@ -93,7 +102,7 @@
     </div>
 
     <canvas id="simCanvas"></canvas>
-    <script src="/index.js"></script>
+    <script type="module" src="./src/index.ts"></script>
 </body>
 
 </html>
