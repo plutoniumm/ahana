@@ -1,4 +1,3 @@
-
 const Vec2 = {
   add: ( v1, v2 ) => ( { x: v1.x + v2.x, y: v1.y + v2.y } ),
   sub: ( v1, v2 ) => ( { x: v1.x - v2.x, y: v1.y - v2.y } ),
@@ -17,10 +16,19 @@ const Vec2 = {
 };
 
 const canvas = document.getElementById( 'simCanvas' );
-const ctx = canvas.getContext( '2d', { alpha: false } ); // Optimize
+const ctx = canvas.getContext( '2d', { alpha: false } );
 let width, height;
 
-const DISPERSION_STRENGTH = 0.04; // How much n varies between Red and Blue
+// Add pan offset, zoom, and panning state
+let panOffset = { x: 0, y: 0 };
+let zoom = 1;
+const MIN_ZOOM = 0.2;
+const MAX_ZOOM = 5;
+let isPanning = false;
+let panStart = { x: 0, y: 0 };
+let panOffsetStart = { x: 0, y: 0 };
+
+const DISPERSION_STRENGTH = 0.04;
 const MAX_BOUNCES = 12;
 
 let lightSource = { x: 100, y: 300 };
@@ -46,6 +54,33 @@ const ui = {
   rays: document.getElementById( 'rayCountSlider' ),
   raysVal: document.getElementById( 'rayVal' )
 };
+
+const panel = document.querySelector( '.panel' );
+panel.style.cursor = 'move';
+let draggingPanel = false;
+let start = { x: 0, y: 0 };
+let panelStart = { x: 0, y: 0 };
+panel.addEventListener( 'mousedown', ( e ) => {
+  if ( e.target.tagName.toLowerCase() === 'input' ) return;
+  draggingPanel = true;
+  document.body.style.cursor = 'move';
+  start = { x: e.clientX, y: e.clientY };
+  const rect = panel.getBoundingClientRect();
+  panelStart = { x: rect.left, y: rect.top };
+  e.preventDefault();
+} );
+window.addEventListener( 'mousemove', ( e ) => {
+  if ( !draggingPanel ) return;
+  console.log( 'e.target:', e.target );
+  const dx = e.clientX - start.x;
+  const dy = e.clientY - start.y;
+  panel.style.left = ( panelStart.x + dx ) + 'px';
+  panel.style.top = ( panelStart.y + dy ) + 'px';
+} );
+window.addEventListener( 'mouseup', () => {
+  draggingPanel = false;
+  document.body.style.cursor = '';
+} );
 
 class OpticalObject {
   constructor ( x, y ) {
@@ -295,6 +330,21 @@ function init () {
   canvas.addEventListener( 'mousemove', onMouseMove );
   canvas.addEventListener( 'mouseup', onMouseUp );
 
+  // Zoom with mouse wheel, centered at cursor position
+  canvas.addEventListener( 'wheel', ( e ) => {
+    e.preventDefault();
+    const mx = e.clientX;
+    const my = e.clientY;
+    const oldWorld = screenToWorld( mx, my );
+    const delta = e.deltaY; // positive = zoom out
+    const zoomFactor = Math.exp( -delta * 0.0015 );
+    const newZoom = Math.min( MAX_ZOOM, Math.max( MIN_ZOOM, zoom * zoomFactor ) );
+    zoom = newZoom;
+    // Keep cursor's world point fixed
+    panOffset.x = mx - oldWorld.x * zoom;
+    panOffset.y = my - oldWorld.y * zoom;
+  }, { passive: false } );
+
   ui.rot.oninput = updateSelected;
   ui.ior.oninput = updateSelected;
   ui.curve.oninput = updateSelected;
@@ -359,17 +409,28 @@ function loop () {
   ctx.fillStyle = '#080808';
   ctx.fillRect( 0, 0, width, height );
 
-  // Draw Grid
+  ctx.save();
+  // Apply pan and zoom transform
+  ctx.translate( panOffset.x, panOffset.y );
+  ctx.scale( zoom, zoom );
+
+  // Draw Grid (infinite appearance)
   ctx.strokeStyle = '#1a1a1a';
-  ctx.lineWidth = 1;
-  for ( let x = 0;x < width;x += 50 ) { ctx.beginPath(); ctx.moveTo( x, 0 ); ctx.lineTo( x, height ); ctx.stroke(); }
-  for ( let y = 0;y < height;y += 50 ) { ctx.beginPath(); ctx.moveTo( 0, y ); ctx.lineTo( width, y ); ctx.stroke(); }
+  ctx.lineWidth = 1 / zoom;
+  const gridStep = 50;
+  const viewMinX = -panOffset.x / zoom;
+  const viewMinY = -panOffset.y / zoom;
+  const viewMaxX = viewMinX + width / zoom;
+  const viewMaxY = viewMinY + height / zoom;
+  let startX = Math.floor( viewMinX / gridStep ) * gridStep;
+  let startY = Math.floor( viewMinY / gridStep ) * gridStep;
+  for ( let x = startX;x <= viewMaxX;x += gridStep ) { ctx.beginPath(); ctx.moveTo( x, viewMinY ); ctx.lineTo( x, viewMaxY ); ctx.stroke(); }
+  for ( let y = startY;y <= viewMaxY;y += gridStep ) { ctx.beginPath(); ctx.moveTo( viewMinX, y ); ctx.lineTo( viewMaxX, y ); ctx.stroke(); }
 
   // Draw Objects
   objects.forEach( o => o.draw( ctx ) );
 
   // Trace Rays (Red, Green, Blue passes)
-  // We use screen blending so Red+Green+Blue = White
   ctx.globalCompositeOperation = 'screen';
 
   const rayCount = parseInt( ui.rays.value );
@@ -377,10 +438,6 @@ function loop () {
   const spreadRad = spreadDeg * ( Math.PI / 180 );
   const baseAngle = parseFloat( ui.angle.value ) * ( Math.PI / 180 );
 
-  // Pre-calculate rays
-  // If spread is 0, all rays have same angle. If spread > 0, interpolate.
-
-  // WAVELENGTHS: R=0, G=1, B=2
   const wavelengths = [
     { color: '#ff0000', nOffset: -DISPERSION_STRENGTH, label: 'R' },
     { color: '#00ff00', nOffset: 0, label: 'G' },
@@ -392,11 +449,10 @@ function loop () {
     ctx.beginPath();
 
     for ( let i = 0;i < rayCount;i++ ) {
-      // Determine Ray Angle
       let rayAngle = baseAngle;
       if ( spreadRad > 0 && rayCount > 1 ) {
         const pct = i / ( rayCount - 1 );
-        rayAngle += ( pct - 0.5 ) * spreadRad;
+        rayAngle += ( pct - 0.5 ) * spreadRad * 2;
       }
 
       traceSingleRay(
@@ -414,12 +470,13 @@ function loop () {
   // Draw Source Handle
   ctx.fillStyle = '#fff';
   ctx.beginPath(); ctx.arc( lightSource.x, lightSource.y, 6, 0, Math.PI * 2 ); ctx.fill();
-  // Angle indicator
   ctx.strokeStyle = '#fff';
   ctx.beginPath();
   ctx.moveTo( lightSource.x, lightSource.y );
   ctx.lineTo( lightSource.x + Math.cos( baseAngle ) * 20, lightSource.y + Math.sin( baseAngle ) * 20 );
   ctx.stroke();
+
+  ctx.restore();
 
   requestAnimationFrame( loop );
 }
@@ -498,11 +555,16 @@ function traceSingleRay ( origin, dir, nOffset, intensity ) {
   for ( let i = 1;i < points.length;i++ ) ctx.lineTo( points[ i ].x, points[ i ].y );
 }
 
+function screenToWorld ( mx, my ) {
+  return { x: ( mx - panOffset.x ) / zoom, y: ( my - panOffset.y ) / zoom };
+}
+
 function onMouseDown ( e ) {
   const mx = e.clientX, my = e.clientY;
+  const world = screenToWorld( mx, my );
 
   // Check light source
-  if ( Vec2.dist( { x: mx, y: my }, lightSource ) < 15 ) {
+  if ( Vec2.dist( world, lightSource ) < 15 ) {
     dragging = lightSource;
     return;
   }
@@ -510,7 +572,7 @@ function onMouseDown ( e ) {
   // Check objects (Reverse order for z-index)
   let hitObj = null;
   for ( let i = objects.length - 1;i >= 0;i-- ) {
-    if ( objects[ i ].hitTest( mx, my ) ) {
+    if ( objects[ i ].hitTest( world.x, world.y ) ) {
       hitObj = objects[ i ];
       break;
     }
@@ -522,7 +584,7 @@ function onMouseDown ( e ) {
   if ( selectedObj ) {
     selectedObj.selected = true;
     dragging = selectedObj;
-    dragOffset = { x: mx - selectedObj.x, y: my - selectedObj.y };
+    dragOffset = { x: world.x - selectedObj.x, y: world.y - selectedObj.y };
 
     ui.selection.style.display = 'block';
     ui.rot.value = ( selectedObj.rotation * 180 / Math.PI ).toFixed( 0 );
@@ -537,22 +599,32 @@ function onMouseDown ( e ) {
       ui.lensCtrl.style.display = 'none';
     }
   } else {
+    // Start panning if clicked on empty canvas
+    isPanning = true;
+    panStart = { x: mx, y: my };
+    panOffsetStart = { ...panOffset };
     ui.selection.style.display = 'none';
   }
 }
 
 function onMouseMove ( e ) {
-  if ( !dragging ) return;
   const mx = e.clientX, my = e.clientY;
+  if ( isPanning ) {
+    panOffset.x = panOffsetStart.x + ( mx - panStart.x );
+    panOffset.y = panOffsetStart.y + ( my - panStart.y );
+    return;
+  }
+  if ( !dragging ) return;
+  const world = screenToWorld( mx, my );
 
   if ( dragging === lightSource ) {
-    lightSource.x = mx; lightSource.y = my;
+    lightSource.x = world.x; lightSource.y = world.y;
   } else {
-    dragging.x = mx - dragOffset.x;
-    dragging.y = my - dragOffset.y;
+    dragging.x = world.x - dragOffset.x;
+    dragging.y = world.y - dragOffset.y;
   }
 }
 
-function onMouseUp () { dragging = null; }
+function onMouseUp () { dragging = null; isPanning = false; }
 
 init();

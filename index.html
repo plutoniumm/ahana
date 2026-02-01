@@ -30,11 +30,11 @@
 
     <div id="ui-layer">
         <div class="panel">
-            <h2>Light Source</h2>
+            <h2>Source</h2>
 
             <div class="control-row">
                 <span>Beam Spread</span>
-                <input type="range" id="spreadSlider" min="0" max="60" step="1" value="0">
+                <input type="range" id="spreadSlider" min="0" max="180" step="1" value="0">
                 <span class="val-display" id="spreadVal">0°</span>
             </div>
             <div class="control-row">
@@ -44,26 +44,34 @@
             </div>
             <div class="control-row">
                 <span>Source Angle</span>
-                <input type="range" id="angleSlider" min="0" max="360" step="1" value="0">
+                <input type="range" id="angleSlider" min="-180" max="180" step="1" value="0">
                 <span class="val-display" id="angleVal">0°</span>
             </div>
 
-            <h2>Tools</h2>
+            <h2>Blocks</h2>
             <div class="btn-group">
-                <button onclick="addPrism()">+ Prism</button>
-                <button onclick="addBlock()">+ Block</button>
-                <button onclick="addLens('converging')">+ Conv. Lens</button>
-                <button onclick="addLens('diverging')">+ Div. Lens</button>
+                <button onclick="addPrism()">
+                    <img src="/icons/prism.svg" alt="Prism" title="Add Prism">
+                </button>
+                <button onclick="addBlock()">
+                    <img src="/icons/block.svg" alt="Block" title="Add Block">
+                </button>
+                <button onclick="addLens('converging')">
+                    <img src="/icons/conv.svg" alt="Converging Lens" title="Add Converging Lens">
+                </button>
+                <button onclick="addLens('diverging')">
+                    <img src="/icons/div.svg" alt="Diverging Lens" title="Add Diverging Lens">
+                </button>
             </div>
-            <button class="danger" onclick="clearScene()" style="width:100%">Clear Scene</button>
+            <button class="danger" onclick="clearScene()" style="width:100%">Clear</button>
         </div>
 
-        <div class="panel" id="selectionPanel">
+        <div class="panel" id="selectionPanel" style="position:absolute; left:20px; top:20px;">
             <h2 style="color:#ff00de">Selected Object</h2>
 
             <div class="control-row">
                 <span>Rotation</span>
-                <input type="range" id="objRotation" min="0" max="360" step="1">
+                <input type="range" id="objRotation" min="-180" max="180" step="1">
                 <span class="val-display" id="objRotVal">0°</span>
             </div>
 

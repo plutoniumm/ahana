@@ -4,3 +4,4 @@ dist
 build
 .vscode/
 pnpm-lock.yaml
+package-lock.json
